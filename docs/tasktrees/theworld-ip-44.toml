@@ -24,13 +24,13 @@ comment = "Use Artifact EVM -> Deployed EVM verification flow after Base Mainnet
 id = "root-dao-emergency-stop"
 name = "Implement DAO-wide emergency stop and governed release flow"
 estimate = { hours = 24 }
-checkbox = "unchecked"
+checkbox = "checked"
 
 [[root.subtasks]]
 id = "task-erc7546-wiring"
 name = "Define emergency-stop state, roles, and ERC-7546 wiring"
 estimate = { hours = 4 }
-checkbox = "unchecked"
+checkbox = "checked"
 acceptance = [
   "test -f src/dao/EmergencyStopTypes.idr && test -f src/dao/DaoProxy.idr",
   "rg -n 'IncidentPause|AuditorApproval|ShareholderReleaseVote' src/dao/EmergencyStopTypes.idr",
@@ -41,7 +41,7 @@ acceptance = [
 id = "task-auditor-pause-activation"
 name = "Implement Auditor 3-of-N emergency pause activation flow"
 estimate = { hours = 6 }
-checkbox = "unchecked"
+checkbox = "checked"
 acceptance = [
   "test -f src/dao/EmergencyStopLogic.idr",
   "rg -n 'approveIncidentPause|executeIncidentPause|minimumAuditorApprovals = 3' src/dao/EmergencyStopLogic.idr",
@@ -52,7 +52,7 @@ acceptance = [
 id = "task-shareholder-unpause-vote"
 name = "Implement shareholder majority vote flow to release the pause"
 estimate = { hours = 5 }
-checkbox = "unchecked"
+checkbox = "checked"
 acceptance = [
   "rg -n 'startUnpauseVote|castUnpauseVote|finalizeUnpauseVote' src/dao/EmergencyStopLogic.idr",
   "rg -n 'shareholderMajority|totalShares|yesShares' src/dao/EmergencyStopLogic.idr",
@@ -63,7 +63,7 @@ acceptance = [
 id = "task-dao-entrypoint-guards"
 name = "Guard all DAO state-changing operations while emergency pause is active"
 estimate = { hours = 5 }
-checkbox = "unchecked"
+checkbox = "checked"
 acceptance = [
   "test -f src/dao/DaoEntrypoints.idr",
   "rg -n 'requireNotPaused|whenNotPaused' src/dao/DaoEntrypoints.idr",
@@ -74,7 +74,7 @@ acceptance = [
 id = "task-build-deploy-verify"
 name = "Add Yul build, Base Mainnet deployment, and verification pipeline for the emergency-stop feature"
 estimate = { hours = 4 }
-checkbox = "unchecked"
+checkbox = "checked"
 acceptance = [
   "test -f scripts/build-dao-emergency-stop.sh && test -f scripts/deploy-dao-emergency-stop.sh && test -f scripts/verify-dao-emergency-stop.sh",
   "rg -n 'idris2-yul --codegen yul|solc --strict-assembly' scripts/build-dao-emergency-stop.sh",
