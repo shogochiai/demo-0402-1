@@ -7,15 +7,10 @@ ticker  = "TD"
 name    = "td"
 ens     = "td.onthe.eth"
 version = 1
-executor = "claude"
-architect = "claude-opus-4-6"
+executor = "codex"
+architect = "codex"
 
 [[lazy]]
 target     = "pkgs/Idris2TextDao"
 family     = "evm"
-step3_sync = false
-
-[[lazy]]
-target     = "pkgs/Idris2TextDaoCli"
-family     = "core"
 step3_sync = false
