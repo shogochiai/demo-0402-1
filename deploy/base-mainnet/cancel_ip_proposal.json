@@ -1,0 +1,12 @@
+{
+  "network": "Base Mainnet",
+  "contract": "cancel_ip_proposal",
+  "family": "evm",
+  "signing": "t-ECDSA",
+  "artifact": "build/solc/Cancel.bin",
+  "entrypoint": "cancelIpProposal",
+  "notes": [
+    "Deploy behind the ERC-7546 dictionary/proxy flow.",
+    "Proposal cancellation implementation compiled from Idris2 to Yul."
+  ]
+}

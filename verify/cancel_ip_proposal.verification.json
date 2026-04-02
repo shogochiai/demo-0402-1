@@ -1,0 +1,12 @@
+{
+  "workflow": "IcWasm.Verification",
+  "source": "Artifact EVM",
+  "target": "Deployed EVM",
+  "artifact": "build/solc/Cancel.bin",
+  "contract": "cancel_ip_proposal",
+  "network": "Base Mainnet",
+  "notes": [
+    "Verify build/Cancel.yul and the compiled bytecode against the deployed proxy-selected implementation.",
+    "Use the Artifact EVM -> Deployed EVM proof path."
+  ]
+}

@@ -23,6 +23,13 @@ The Fork cycle is the core deliberation mechanism:
 5. **Refinement** — Repeat until convergence
 6. **Finalize** — Winner Fork triggers its type-specific execution hook
 
+## Cancelled Proposals
+
+- Proposal authors may cancel their own IP proposals before voting finalization ends.
+- A cancelled proposal moves into a terminal `cancelled` state and leaves the active proposal list immediately.
+- `tallyAllDueIps` skips cancelled proposals, so they no longer consume active governance flow bandwidth.
+- Operator path: `etherclaw ip cancel <ipId>` which maps to `cancelIpProposal` with an `ipId` payload.
+
 ### Finalize Execution Hooks
 
 | Proposal Type | Hook | Effect |
