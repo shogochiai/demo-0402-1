@@ -1,0 +1,10 @@
+package governance-timeline
+
+sourcedir = src
+
+modules = Governance.Timeline
+        , EVM.Primitives
+        , Subcontract.Standards.ERC7546.Slots
+
+main = Governance.Timeline
+executable = governance-timeline
