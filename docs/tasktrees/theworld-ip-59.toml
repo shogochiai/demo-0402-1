@@ -1,0 +1,63 @@
+version    = "1.0"
+id         = "theworld-ip-59"
+title      = "Add getProposalExpiration view to TextDAO"
+owner      = "etherclaw"
+created_at = "2026-04-02"
+
+[metadata]
+source   = "theworld-ip-poll"
+priority = "P1_Governance"
+
+[root]
+id       = "1"
+name     = "Add getProposalExpiration view to TextDAO"
+estimate = { hours = 2 }
+checkbox = "unchecked"
+
+[[packages]]
+target = "pkgs/Idris2TextDao"
+family = "evm"
+
+[[root.subtasks]]
+id       = "1.1"
+name     = "REQ_PROPOSAL_EXPIRATION_001/002 実装: Propose.idr に getProposalExpiration view/entry を追加"
+estimate = { hours = 1 }
+checkbox = "unchecked"
+acceptance = [
+  "rg -n 'getProposalExpirationSig|getProposalExpirationSel|getProposalExpirationEntry|getProposalExpirationView' pkgs/Idris2TextDao/src/TextDAO/Functions/Propose/Propose.idr -S",
+  "rg -n '0x2c7aaa8b' pkgs/Idris2TextDao/src/TextDAO/Functions/Propose/Propose.idr -S",
+  "test -d pkgs/Idris2TextDao/src",
+  "cd pkgs/Idris2TextDao && pack test textdao-tests",
+  "[ ! -e ./src ] && [ ! -e ./EVM ] && [ ! -e ./Governance ] && [ ! -e ./Src ]",
+]
+
+[[root.subtasks]]
+id       = "1.2"
+name     = "REQ_PROPOSAL_EXPIRATION_003 テスト更新: ProposeTest / AllTests / SPEC を揃える"
+estimate = { hours = 1 }
+checkbox = "unchecked"
+acceptance = [
+  "rg -n 'REQ_PROPOSAL_EXPIRATION_00[123]|getProposalExpirationView|getProposalExpirationEntry' pkgs/Idris2TextDao/src/TextDAO/Functions/Propose pkgs/Idris2TextDao/src/TextDAO/Tests/AllTests.idr pkgs/Idris2TextDao/src/TextDAO/Functions/Propose/SPEC.toml -S",
+  "cd pkgs/Idris2TextDao && pack test textdao-tests",
+  "[ ! -e ./src ] && [ ! -e ./EVM ] && [ ! -e ./Governance ] && [ ! -e ./Src ]",
+]
+
+[[codebase_ref]]
+path    = "pkgs/Idris2TextDao"
+comment = "Implementation target from [[lazy]]"
+
+[[codebase_ref]]
+path    = "pkgs/Idris2TextDao/src/TextDAO/Functions/Propose/Propose.idr"
+comment = "Mirror the existing getProposalState view pattern here; new selector is 0x2c7aaa8b"
+
+[[codebase_ref]]
+path    = "pkgs/Idris2TextDao/src/TextDAO/Storages/Schema.idr"
+comment = "Reuse existing getProposalExpiration storage accessor instead of reimplementing storage logic"
+
+[[codebase_ref]]
+path    = "pkgs/Idris2TextDao/src/TextDAO/Functions/Propose/Tests/ProposeTest.idr"
+comment = "Add focused tests for the new getProposalExpiration view"
+
+[[codebase_ref]]
+path    = "pkgs/Idris2TextDao/src/TextDAO/Tests/AllTests.idr"
+comment = "Wire the new Propose tests into the aggregate runner"

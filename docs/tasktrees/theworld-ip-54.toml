@@ -1,0 +1,27 @@
+version = "1.0"
+id = "theworld-ip-54"
+title = "Skip legacy backlog through IP-53"
+owner = "etherclaw"
+created_at = "2026-04-01"
+
+[control]
+type = "skip_range"
+skip_ip_range = "1-53"
+note = "Colony must not generate a TaskTree for this proposal itself. Apply skip rule before evaluating normal IPs."
+
+[root]
+id = "root"
+name = "Colony control: skip IP-1 through IP-53"
+estimate = { hours = 0 }
+checkbox = "unchecked"
+
+[[root.subtasks]]
+id = "subtask-1"
+name = "Apply SKIP_IP_RANGE control block"
+estimate = { hours = 0 }
+checkbox = "unchecked"
+acceptance = [
+  "Colony treats IP-1 through IP-53 as excluded from execution",
+  "Colony continues processing normal finalized IPs after IP-53",
+  "This proposal (IP-54) is recognized as control metadata, not product work",
+]

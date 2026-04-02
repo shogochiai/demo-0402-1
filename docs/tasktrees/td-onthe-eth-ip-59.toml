@@ -1,0 +1,76 @@
+version = "1.0"
+id = "td-onthe-eth-ip-59"
+title = "Implement td.onthe.eth/ip/59 in Idris2TextDao"
+owner = "etherclaw"
+created_at = "2026-04-01"
+source_uri = "td.onthe.eth/ip/59"
+source_status = "unavailable_at_planning_time"
+
+[[packages]]
+id = "idris2textdao"
+path = "pkgs/Idris2TextDao"
+family = "evm"
+role = "primary_implementation_root"
+
+# Source for td.onthe.eth/ip/59 was unavailable during planning; task 1 recovers and freezes the canonical spec before behavior is finalized.
+
+[root]
+id = "root-ip-59"
+name = "Recover, specify, implement, and verify td.onthe.eth/ip/59"
+estimate = { hours = 24 }
+checkbox = "unchecked"
+
+[[root.subtasks]]
+id = "ip59-spec-lock"
+name = "Recover canonical IP-59 text and freeze package-local spec"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  'cd pkgs/Idris2TextDao && test -f docs/ip-59/spec.md',
+  'cd pkgs/Idris2TextDao && rg -n "^IP URI: td\\.onthe\\.eth/ip/59$" docs/ip-59/spec.md',
+  'cd pkgs/Idris2TextDao && rg -n "^(Implementation Pattern|Deployment Target|Verification Flow):" docs/ip-59/implementation-notes.md'
+]
+
+[[root.subtasks]]
+id = "ip59-types-selectors"
+name = "Model ERC-7546 selectors and subcontract types for IP-59"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  'cd pkgs/Idris2TextDao && test -f ip59/Types.idr && test -f ip59/Selectors.idr',
+  'cd pkgs/Idris2TextDao && rg -n "getImplementation|0xdc9cc645" ip59/Types.idr ip59/Selectors.idr',
+  'cd pkgs/Idris2TextDao && rg -n "idris2-subcontract|ERC-7546" ip59/Types.idr'
+]
+
+[[root.subtasks]]
+id = "ip59-logic-yul"
+name = "Generate storage-free IP-59 logic Yul from Idris2"
+estimate = { hours = 6 }
+checkbox = "unchecked"
+acceptance = [
+  'cd pkgs/Idris2TextDao && test -f ip59/Logic.idr && test -f tooling/ip59/build.sh',
+  'cd pkgs/Idris2TextDao && sh tooling/ip59/build.sh',
+  'cd pkgs/Idris2TextDao && rg -n "idris2-yul|codegen yul|strict-assembly" tooling/ip59/build.sh && test -f artifacts/ip59/logic.yul'
+]
+
+[[root.subtasks]]
+id = "ip59-proxy-clone"
+name = "Assemble ERC-7546 upgradeable clone proxy for IP-59"
+estimate = { hours = 5 }
+checkbox = "unchecked"
+acceptance = [
+  'cd pkgs/Idris2TextDao && test -f ip59/Proxy.idr',
+  'cd pkgs/Idris2TextDao && rg -n "Upgradeable Clone|ERC-7546|getImplementation|0xdc9cc645" ip59/Proxy.idr',
+  'cd pkgs/Idris2TextDao && sh tooling/ip59/build.sh && test -f artifacts/ip59/proxy.yul'
+]
+
+[[root.subtasks]]
+id = "ip59-deploy-verify"
+name = "Wire Base Mainnet deploy and IcWasm verification flow for IP-59"
+estimate = { hours = 5 }
+checkbox = "unchecked"
+acceptance = [
+  'cd pkgs/Idris2TextDao && test -f tooling/ip59/deploy-base-mainnet.sh && test -f tooling/ip59/verify.sh',
+  'cd pkgs/Idris2TextDao && rg -n "TheWorld|t-ECDSA|Base Mainnet" tooling/ip59/deploy-base-mainnet.sh',
+  'cd pkgs/Idris2TextDao && rg -n "IcWasm\\.Verification|Artifact EVM|Deployed EVM|verify" tooling/ip59/verify.sh docs/ip-59/runbook.md'
+]

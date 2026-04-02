@@ -5,6 +5,20 @@
 - ENS: `td.onthe.eth`
 - Managed by EtherClaw
 
+## Identifier Glossary
+
+- `IP-N` = TheWorld IP proposal ID
+- `PR #N` = GitHub pull request number
+- `TheWorld review proposal #N` = `github_proposals.github_proposal_id`
+- `Release Proposal #N` = TheWorld release proposal ID
+- Avoid bare `#N` in prompts, logs, and operator notes.
+
+## Package Target Discipline
+
+- `ETHERCLAW.toml` `[[lazy]]` entries define the real package roots.
+- `pkgs/Idris2TextDao` is the EVM package root in this demo.
+- Do not create repo-root `src/`, `tests/`, `deploy/`, `scripts/`, `EVM/`, `Governance/`, or `Src/` paths for package-local work.
+
 ## Init-Time Skills
 
 ### Required Skills

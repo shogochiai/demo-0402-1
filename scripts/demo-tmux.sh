@@ -81,7 +81,7 @@ tmux select-pane -t "$SESSION:0.5" -T auditor
 # Send commands to each pane (printf banner + command)
 tmux send-keys -t "$SESSION:0.0" "clear && printf '\n  FLOW MONITOR\n  ----------------------------------------\n  Pipeline status (60s refresh)\n\n' && \"$ETHERCLAW_BIN\" flow --watch --online --instance td 2>/dev/null || echo Waiting..." Enter
 tmux send-keys -t "$SESSION:0.2" 'clear && printf "\n  IP PROPOSER (Shareholder)\n  ----------------------------------------\n  etherclaw ip propose --file docs/prd/...\n\n"' Enter
-tmux send-keys -t "$SESSION:0.4" "clear && printf '\n  COLONY (Daemon)\n  ----------------------------------------\n  Autonomous IP implementation\n\n' && mkdir -p .etherclaw/logs && \"$ETHERCLAW_BIN\" daemon --governed 2>/dev/null && tail -f .etherclaw/logs/standalone.log 2>/dev/null | grep -v '^WARNING'" Enter
+tmux send-keys -t "$SESSION:0.4" "clear && printf '\n  COLONY (Daemon)\n  ----------------------------------------\n  Autonomous IP implementation\n\n' && exec \"$ETHERCLAW_BIN\" daemon --governed --foreground" Enter
 tmux send-keys -t "$SESSION:0.1" 'clear && printf "\n  REVIEWER\n  ----------------------------------------\n  etherclaw review approve <PR#>\n\n"' Enter
 tmux send-keys -t "$SESSION:0.3" 'clear && printf "\n  RELEASE PROPOSER\n  ----------------------------------------\n  etherclaw release propose --ips N,N --version v1.x.0\n\n"' Enter
 tmux send-keys -t "$SESSION:0.5" 'clear && printf "\n  AUDITOR\n  ----------------------------------------\n  etherclaw auditor vote --release N --approve\n\n"' Enter
