@@ -1,0 +1,7 @@
+package td
+version = 0
+
+depends = base
+sourcedir = src
+builddir = build
+outputdir = build/exec
