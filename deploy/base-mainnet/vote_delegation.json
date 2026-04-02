@@ -1,0 +1,35 @@
+{
+  "name": "VoteDelegation",
+  "network": "Base Mainnet",
+  "chainId": 8453,
+  "family": "evm",
+  "signing": {
+    "method": "t-ECDSA",
+    "controller": "TheWorld",
+    "status": "prepared"
+  },
+  "upgradePattern": {
+    "standard": "ERC-7546",
+    "proxy": "UpgradeableClone",
+    "getImplementationSelector": "0xdc9cc645"
+  },
+  "artifact": {
+    "yulPath": "build/VoteDelegation.yul",
+    "yulSha256": "128c0528641ac0b28ff3e4a6c45c563d3829f31da1aedcb79c4211c0dd9d0cd9",
+    "bytecodePath": "build/solc/VoteDelegation.bin",
+    "bytecodeSha256": "e3befd5293e0ec31639cf4d5b6ca18003055b6afe417cc7329f000cba0dc5b8b",
+    "bytecodeKeccak256": "0xf2c8086646cb5f7301520e16cc61c45f789bb8d5d64ff0e3051e03e4f0f6998c",
+    "byteLengthHex": 5003
+  },
+  "deployment": {
+    "kind": "implementation",
+    "status": "pending-broadcast",
+    "targetAddress": "PENDING_BASE_MAINNET_DEPLOYMENT",
+    "dictionaryAddress": "PENDING_ERC7546_DICTIONARY",
+    "notes": [
+      "Deploy implementation bytecode on Base Mainnet.",
+      "Register delegation selectors in the ERC-7546 dictionary.",
+      "Update UpgradeableClone routing after implementation deployment."
+    ]
+  }
+}
