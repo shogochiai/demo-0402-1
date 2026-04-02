@@ -1,0 +1,72 @@
+version = "1.0"
+id = "theworld-ip-42"
+title = "Governance timeline read-only function with timestamps"
+owner = "etherclaw"
+created_at = "2026-04-01"
+
+[[codebase_ref]]
+path = "vendor/idris2-evm/examples/selector-dispatch.idr"
+comment = "Use idris2-evm Yul codegen patterns for selector routing and ABI-safe read-only return encoding."
+
+[[codebase_ref]]
+path = "vendor/idris2-subcontract/src/ERC7546/UpgradeableClone.idr"
+comment = "Use ERC-7546 upgradeable clone types and selector mapping; keep implementation logic storage-free and proxy-compatible."
+
+[root]
+id = "root-governance-timeline"
+name = "Add a read-only governance timeline API that returns propose, vote, tally, and execute events with timestamps for UI rendering"
+estimate = { hours = 18 }
+checkbox = "unchecked"
+
+[[root.subtasks]]
+id = "timeline-spec"
+name = "Define the governance timeline response schema and selector surface"
+estimate = { hours = 3 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f specs/governance_timeline.md",
+  "rg -n 'proposalId|propose|vote|tally|execute|timestamp|timeline' specs/governance_timeline.md",
+  "rg -n 'ERC-7546|getImplementation|0xdc9cc645' specs/governance_timeline.md"
+]
+
+[[root.subtasks]]
+id = "timeline-read-model"
+name = "Implement timestamp extraction for propose, vote, tally, and execute lifecycle points in Idris2"
+estimate = { hours = 5 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f src/Governance/Timeline.idr",
+  "rg -n 'propose|vote|tally|execute|timestamp' src/Governance/Timeline.idr",
+  "rg -n 'proposalId|event|timeline' src/Governance/Timeline.idr"
+]
+
+[[root.subtasks]]
+id = "timeline-selector"
+name = "Expose the read-only timeline function through ERC-7546 selector dispatch and ABI encoding"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  "rg -n 'getImplementation|0xdc9cc645' src",
+  "rg -n 'timeline|selector|abi|encode' src/Governance/Timeline.idr",
+  "rg -n 'idris2-subcontract|ERC7546' src"
+]
+
+[[root.subtasks]]
+id = "timeline-build"
+name = "Produce Yul and EVM bytecode artifacts for the timeline implementation"
+estimate = { hours = 3 }
+checkbox = "unchecked"
+acceptance = [
+  "idris2-yul --codegen yul src/Governance/Timeline.idr -o build/GovernanceTimeline.yul && test -s build/GovernanceTimeline.yul",
+  "solc --strict-assembly build/GovernanceTimeline.yul --bin -o build/solc && test -s build/solc/GovernanceTimeline.bin"
+]
+
+[[root.subtasks]]
+id = "timeline-deploy-verify"
+name = "Prepare Base Mainnet deployment and IcWasm verification artifacts for the timeline feature"
+estimate = { hours = 3 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f deploy/base-mainnet/governance_timeline.json && rg -n 't-ECDSA|Base Mainnet' deploy/base-mainnet/governance_timeline.json",
+  "test -f verify/governance_timeline.verification.json && rg -n 'Artifact EVM|Deployed EVM|IcWasm.Verification' verify/governance_timeline.verification.json"
+]

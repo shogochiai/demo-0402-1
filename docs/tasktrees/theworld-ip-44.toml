@@ -1,0 +1,82 @@
+version = "1.0"
+id = "theworld-ip-44"
+title = "DAO Emergency Stop with Auditor Quorum and Shareholder Majority Release"
+owner = "etherclaw"
+created_at = "2026-04-01"
+
+[[codebase_ref]]
+path = "vendor/idris2-evm"
+comment = "Use idris2-evm for Idris-to-Yul code generation; do not introduce Solidity-based implementations."
+
+[[codebase_ref]]
+path = "vendor/idris2-subcontract"
+comment = "Use idris2-subcontract ERC-7546 types and selector helpers for the upgradeable clone pattern."
+
+[[codebase_ref]]
+path = "vendor/erc-7546-upgradeable-clone"
+comment = "Follow ERC-7546 upgradeable clone routing, including getImplementation(bytes4) selector 0xdc9cc645 and proxy/logic separation."
+
+[[codebase_ref]]
+path = "vendor/IcWasm.Verification"
+comment = "Use Artifact EVM -> Deployed EVM verification flow after Base Mainnet deployment."
+
+[root]
+id = "root-dao-emergency-stop"
+name = "Implement DAO-wide emergency stop and governed release flow"
+estimate = { hours = 24 }
+checkbox = "unchecked"
+
+[[root.subtasks]]
+id = "task-erc7546-wiring"
+name = "Define emergency-stop state, roles, and ERC-7546 wiring"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f src/dao/EmergencyStopTypes.idr && test -f src/dao/DaoProxy.idr",
+  "rg -n 'IncidentPause|AuditorApproval|ShareholderReleaseVote' src/dao/EmergencyStopTypes.idr",
+  "rg -n 'getImplementation|0xdc9cc645' src/dao/DaoProxy.idr"
+]
+
+[[root.subtasks]]
+id = "task-auditor-pause-activation"
+name = "Implement Auditor 3-of-N emergency pause activation flow"
+estimate = { hours = 6 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f src/dao/EmergencyStopLogic.idr",
+  "rg -n 'approveIncidentPause|executeIncidentPause|minimumAuditorApprovals = 3' src/dao/EmergencyStopLogic.idr",
+  "rg -n 'onlyAuditor|alreadyApproved|paused = True' src/dao/EmergencyStopLogic.idr"
+]
+
+[[root.subtasks]]
+id = "task-shareholder-unpause-vote"
+name = "Implement shareholder majority vote flow to release the pause"
+estimate = { hours = 5 }
+checkbox = "unchecked"
+acceptance = [
+  "rg -n 'startUnpauseVote|castUnpauseVote|finalizeUnpauseVote' src/dao/EmergencyStopLogic.idr",
+  "rg -n 'shareholderMajority|totalShares|yesShares' src/dao/EmergencyStopLogic.idr",
+  "rg -n 'paused = False|clearIncidentPause' src/dao/EmergencyStopLogic.idr"
+]
+
+[[root.subtasks]]
+id = "task-dao-entrypoint-guards"
+name = "Guard all DAO state-changing operations while emergency pause is active"
+estimate = { hours = 5 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f src/dao/DaoEntrypoints.idr",
+  "rg -n 'requireNotPaused|whenNotPaused' src/dao/DaoEntrypoints.idr",
+  "rg -n 'submitProposal|castVote|executeProposal|transferTreasury' src/dao/DaoEntrypoints.idr"
+]
+
+[[root.subtasks]]
+id = "task-build-deploy-verify"
+name = "Add Yul build, Base Mainnet deployment, and verification pipeline for the emergency-stop feature"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f scripts/build-dao-emergency-stop.sh && test -f scripts/deploy-dao-emergency-stop.sh && test -f scripts/verify-dao-emergency-stop.sh",
+  "rg -n 'idris2-yul --codegen yul|solc --strict-assembly' scripts/build-dao-emergency-stop.sh",
+  "rg -n 'TheWorld|t-ECDSA|Base Mainnet|IcWasm.Verification' scripts/deploy-dao-emergency-stop.sh scripts/verify-dao-emergency-stop.sh"
+]

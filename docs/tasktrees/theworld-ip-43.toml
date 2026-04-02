@@ -1,0 +1,83 @@
+version = "1.0"
+id = "theworld-ip-43"
+title = "Shareholder vote delegation with revocation"
+owner = "etherclaw"
+created_at = "2026-04-01"
+
+[[codebase_ref]]
+path = "vendor/idris2-evm/examples/selector-dispatch.idr"
+comment = "Use idris2-evm Yul codegen patterns for selector routing and ABI-safe call handling without Solidity."
+
+[[codebase_ref]]
+path = "vendor/idris2-subcontract/src/ERC7546/UpgradeableClone.idr"
+comment = "Use ERC-7546 upgradeable clone types and selector mapping; keep implementation logic storage-free and proxy-compatible."
+
+[root]
+id = "root-vote-delegation"
+name = "Add shareholder vote delegation so voting power can be assigned to another address and revoked later"
+estimate = { hours = 22 }
+checkbox = "unchecked"
+
+[[root.subtasks]]
+id = "delegation-spec"
+name = "Define the vote delegation and revocation selector surface and behavioral spec"
+estimate = { hours = 3 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f specs/vote_delegation.md",
+  "rg -n 'delegate|revoke|shareholder|delegatee|voting power' specs/vote_delegation.md",
+  "rg -n 'ERC-7546|getImplementation|0xdc9cc645|idris2-evm|idris2-subcontract' specs/vote_delegation.md"
+]
+
+[[root.subtasks]]
+id = "delegation-write-model"
+name = "Implement delegation and revocation state transitions in Idris2"
+estimate = { hours = 5 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f src/Governance/VoteDelegation.idr",
+  "rg -n 'delegate|revoke|delegator|delegatee' src/Governance/VoteDelegation.idr",
+  "rg -n 'setDelegation|clearDelegation|Delegation' src/Governance/VoteDelegation.idr"
+]
+
+[[root.subtasks]]
+id = "delegation-power-model"
+name = "Implement effective voting power resolution so delegatees inherit delegated shareholder voting weight"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f src/Governance/VoteDelegation.idr",
+  "rg -n 'effectiveVotingPower|delegatedVotingPower|shareholderVotingPower' src/Governance/VoteDelegation.idr",
+  "rg -n 'delegatee|delegator|revoke' src/Governance/VoteDelegation.idr"
+]
+
+[[root.subtasks]]
+id = "delegation-selector"
+name = "Expose delegation, revocation, and voting power reads through ERC-7546 selector dispatch and ABI encoding"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  "rg -n 'getImplementation|0xdc9cc645' src",
+  "rg -n 'delegate|revoke|effectiveVotingPower|selector|abi' src/Governance/VoteDelegation.idr",
+  "rg -n 'ERC7546|UpgradeableClone|idris2-subcontract' src"
+]
+
+[[root.subtasks]]
+id = "delegation-build"
+name = "Produce Yul and EVM bytecode artifacts for the delegation implementation"
+estimate = { hours = 3 }
+checkbox = "unchecked"
+acceptance = [
+  "idris2-yul --codegen yul src/Governance/VoteDelegation.idr -o build/VoteDelegation.yul && test -s build/VoteDelegation.yul",
+  "solc --strict-assembly build/VoteDelegation.yul --bin -o build/solc && test -s build/solc/VoteDelegation.bin"
+]
+
+[[root.subtasks]]
+id = "delegation-deploy-verify"
+name = "Prepare Base Mainnet deployment and IcWasm verification artifacts for vote delegation"
+estimate = { hours = 3 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f deploy/base-mainnet/vote_delegation.json && rg -n 't-ECDSA|Base Mainnet' deploy/base-mainnet/vote_delegation.json",
+  "test -f verify/vote_delegation.verification.json && rg -n 'Artifact EVM|Deployed EVM|IcWasm.Verification' verify/vote_delegation.verification.json"
+]

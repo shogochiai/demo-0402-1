@@ -1,0 +1,96 @@
+version = "1.0"
+id = "theworld-ip-41"
+title = "Add cancelProposal to td"
+owner = "etherclaw"
+created_at = "2026-04-01"
+
+# SPEC
+# Sections 1-5 high-level requirements:
+# REQ_CANCEL_001: A proposal author can cancel their own proposal before voting finalization ends to remove stale proposals from the active governance flow.
+# REQ_CANCEL_002: Cancellation is authorized only for the original proposal author and must reject non-authors and proposals already finalized.
+# REQ_CANCEL_003: A successful cancellation moves the proposal into a terminal cancelled state and records an audit event.
+# Sections 6-11 detailed specs:
+# REQ_CANCEL_004: Cancelled proposals are excluded from tally processing, active proposal listings, and voting-slot accounting.
+# REQ_CANCEL_005: TheWorld exposes cancelIpProposal(text) -> (text) with JSON input carrying ipId, implemented with ERC-7546-compatible selector dispatch and storage-free implementation logic.
+# REQ_CANCEL_006: The CLI adds etherclaw ip cancel <ipId> to invoke cancelIpProposal and report the cancelled result to the operator.
+
+[[codebase_ref]]
+path = "vendor/idris2-evm/examples/selector-dispatch.idr"
+comment = "Use idris2-evm Yul codegen patterns for selector routing, ABI-safe argument decoding, and call result encoding without Solidity."
+
+[[codebase_ref]]
+path = "vendor/idris2-subcontract/src/ERC7546/UpgradeableClone.idr"
+comment = "Use ERC-7546 upgradeable clone types and selector mapping; keep implementation logic pure and storage-free behind getImplementation(bytes4)."
+
+[[codebase_ref]]
+path = "pkgs/Idris2TextDao/src/TextDAO/Functions/Propose/Propose.idr"
+comment = "Mirror proposal lifecycle storage access and proposal author lookup from the existing propose flow."
+
+[[codebase_ref]]
+path = "pkgs/Idris2TextDao/src/TextDAO/Functions/Vote/Vote.idr"
+comment = "Reuse voting-window and proposal-state gating patterns so cancelProposal respects the existing governance lifecycle."
+
+[[codebase_ref]]
+path = "pkgs/Idris2TextDao/src/TextDAO/Functions/Tally/Tally.idr"
+comment = "Update tally behavior so cancelled proposals are skipped during due tally execution and no longer consume active governance bandwidth."
+
+[root]
+id = "root-cancel-proposal"
+name = "Add author-driven proposal cancellation to TextDAO governance using Idris2-to-Yul, ERC-7546 upgradeable clones, and Base Mainnet deployment artifacts"
+estimate = { hours = 20 }
+checkbox = "unchecked"
+
+[[root.subtasks]]
+id = "cancel-spec"
+name = "REQ_CANCEL_001 Specify author cancellation behavior, lifecycle gates, and terminal cancelled semantics"
+estimate = { hours = 3 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/SPEC.toml",
+  "rg -n 'REQ_CANCEL_001|REQ_CANCEL_002|REQ_CANCEL_003|REQ_CANCEL_004|REQ_CANCEL_005|REQ_CANCEL_006' pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/SPEC.toml",
+  "rg -n 'cancelIpProposal|cancelled|author|tallyAllDueIps|etherclaw ip cancel' pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/SPEC.toml"
+]
+
+[[root.subtasks]]
+id = "cancel-write-model"
+name = "REQ_CANCEL_002 / REQ_CANCEL_003 Implement cancelIpProposal authorization and cancelled-state transition in Idris2"
+estimate = { hours = 5 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/Cancel.idr",
+  "rg -n 'cancelIpProposal|author|msg_caller|cancelled|status' pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/Cancel.idr",
+  "rg -n 'finalized|voting.*end|terminal|reject' pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/Cancel.idr"
+]
+
+[[root.subtasks]]
+id = "cancel-surface"
+name = "REQ_CANCEL_005 Expose cancelIpProposal through ERC-7546 selector dispatch, JSON decoding, and audit event emission"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  "rg -n 'cancelIpProposal|selector|abi|json|ipId' pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/Cancel.idr",
+  "rg -n 'event|mmnt|cancel' pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/Cancel.idr pkgs/Idris2TextDao/src/TextDAO/Functions/Propose/Propose.idr",
+  "rg -n 'getImplementation|0xdc9cc645|ERC7546|UpgradeableClone' pkgs/Idris2TextDao/src"
+]
+
+[[root.subtasks]]
+id = "cancel-governance-integration"
+name = "REQ_CANCEL_004 / REQ_CANCEL_006 Exclude cancelled proposals from tally and active flows and define the etherclaw ip cancel CLI path"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  "rg -n 'cancelled|tallyAllDueIps|exclude|skip' pkgs/Idris2TextDao/src/TextDAO/Functions/Tally/Tally.idr",
+  "test -f specs/ip_cancel_cli.md && rg -n 'etherclaw ip cancel <ipId>|cancelIpProposal|ipId|cancelled' specs/ip_cancel_cli.md",
+  "rg -n 'cancelled|active proposal|governance flow|proposal list' pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/SPEC.toml docs/latest/GOVERNANCE.md"
+]
+
+[[root.subtasks]]
+id = "cancel-test-build-release"
+name = "REQ_CANCEL_001 / REQ_CANCEL_005 / REQ_CANCEL_006 Add tests, produce Yul and bytecode artifacts, and prepare Base deployment and IcWasm verification"
+estimate = { hours = 4 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/Tests/CancelTest.idr && rg -n 'author|non-author|cancelled|finalized|tally' pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/Tests/CancelTest.idr",
+  "idris2-yul --codegen yul pkgs/Idris2TextDao/src/TextDAO/Functions/Cancel/Cancel.idr -o build/Cancel.yul && test -s build/Cancel.yul",
+  "solc --strict-assembly build/Cancel.yul --bin -o build/solc && test -s build/solc/Cancel.bin && test -f deploy/base-mainnet/cancel_ip_proposal.json && rg -n 't-ECDSA|Base Mainnet' deploy/base-mainnet/cancel_ip_proposal.json && test -f verify/cancel_ip_proposal.verification.json && rg -n 'Artifact EVM|Deployed EVM|IcWasm.Verification' verify/cancel_ip_proposal.verification.json"
+]
