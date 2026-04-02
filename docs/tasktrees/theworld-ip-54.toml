@@ -13,13 +13,13 @@ note = "Colony must not generate a TaskTree for this proposal itself. Apply skip
 id = "root"
 name = "Colony control: skip IP-1 through IP-53"
 estimate = { hours = 0 }
-checkbox = "unchecked"
+checkbox = "checked"
 
 [[root.subtasks]]
 id = "subtask-1"
 name = "Apply SKIP_IP_RANGE control block"
 estimate = { hours = 0 }
-checkbox = "unchecked"
+checkbox = "checked"
 acceptance = [
   "Colony treats IP-1 through IP-53 as excluded from execution",
   "Colony continues processing normal finalized IPs after IP-53",
