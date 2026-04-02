@@ -1,0 +1,45 @@
+version    = "1.0"
+id         = "theworld-ip-59"
+title      = "Add getProposalExpiration view to TextDAO"
+owner      = "etherclaw"
+created_at = "2026-03-28"
+
+[metadata]
+source   = "theworld-ip-poll"
+priority = "P1_Governance"
+
+[root]
+id       = "1"
+name     = "Add getProposalExpiration view to TextDAO"
+estimate = { hours = 2 }
+checkbox = "unchecked"
+
+[[packages]]
+target = "pkgs/Idris2TextDao"
+family = "evm"
+
+[[root.subtasks]]
+id       = "1.1"
+name     = "REQ_PROPOSAL_EXPIRATION_001 実装"
+estimate = { hours = 1 }
+checkbox = "unchecked"
+acceptance = [
+  "test -d pkgs/Idris2TextDao/src",
+  "cd pkgs/Idris2TextDao && pack test",
+  "! find . -maxdepth 2 \\( -path './pkgs' -prune -o -path './.git' -prune -o -path './.etherclaw' -prune \\) -o \\( -name 'EVM' -o -name 'Governance' -o -name 'Src' -o -path './src' \\) -print | grep -q .",
+]
+
+[[root.subtasks]]
+id       = "1.2"
+name     = "REQ_PROPOSAL_EXPIRATION_002 実装"
+estimate = { hours = 1 }
+checkbox = "unchecked"
+acceptance = [
+  "test -d pkgs/Idris2TextDao/src",
+  "cd pkgs/Idris2TextDao && pack test",
+  "! find . -maxdepth 2 \\( -path './pkgs' -prune -o -path './.git' -prune -o -path './.etherclaw' -prune \\) -o \\( -name 'EVM' -o -name 'Governance' -o -name 'Src' -o -path './src' \\) -print | grep -q .",
+]
+
+[[codebase_ref]]
+path    = "pkgs/Idris2TextDao"
+comment = "Implementation target from [[lazy]]"
