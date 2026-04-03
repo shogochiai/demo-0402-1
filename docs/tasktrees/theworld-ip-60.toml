@@ -1,0 +1,68 @@
+```toml
+version = "1.0"
+id = "theworld-ip-60"
+title = "Timer Chain Trigger"
+owner = "etherclaw"
+created_at = "2026-04-01"
+
+[root]
+id = "root"
+name = "Implement Timer Chain for TextDao EVM Contract"
+estimate = { hours = 8 }
+checkbox = "unchecked"
+
+[[root.subtasks]]
+id = "subtask-1"
+name = "Define TimerChain storage layout and types"
+estimate = { hours = 2 }
+checkbox = "unchecked"
+acceptance = [
+  "grep -r 'TimerChain' pkgs/Idris2TextDao/src/ | grep -q 'record\\|data'",
+  "cd pkgs/Idris2TextDao && idris2 --check src/TimerChain/Types.idr",
+]
+
+[[root.subtasks]]
+id = "subtask-2"
+name = "Implement timer trigger Yul codegen via idris2-evm"
+estimate = { hours = 3 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f pkgs/Idris2TextDao/src/TimerChain/Yul.idr",
+  "cd pkgs/Idris2TextDao && idris2 --codegen yul -o /tmp/timer_chain.yul src/TimerChain/Yul.idr",
+  "solc --strict-assembly /tmp/timer_chain.yul | grep -q 'bytecode'",
+]
+
+[[root.subtasks]]
+id = "subtask-3"
+name = "Implement ERC-7546 upgradeable proxy wiring for TimerChain"
+estimate = { hours = 1 }
+checkbox = "unchecked"
+acceptance = [
+  "grep -r 'getImplementation\\|0xdc9cc645' pkgs/Idris2TextDao/src/ | grep -q '.'",
+  "cd pkgs/Idris2TextDao && idris2 --check src/TimerChain/Proxy.idr",
+]
+
+[[root.subtasks]]
+id = "subtask-4"
+name = "Write unit tests for timer chain logic"
+estimate = { hours = 1 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f pkgs/Idris2TextDao/tests/TimerChain/TimerChainTest.idr",
+  "cd pkgs/Idris2TextDao && idris2 tests/TimerChain/TimerChainTest.idr | grep -q 'All tests passed'",
+]
+
+[[root.subtasks]]
+id = "subtask-5"
+name = "Deploy and verify TimerChain contract on Base Mainnet via t-ECDSA"
+estimate = { hours = 1 }
+checkbox = "unchecked"
+acceptance = [
+  "test -f pkgs/Idris2TextDao/src/TimerChain/Deploy.idr",
+  "grep -r 'IcWasm.Verification\\|Artifact EVM' pkgs/Idris2TextDao/src/TimerChain/Deploy.idr | grep -q '.'",
+]
+
+[[packages]]
+path = "pkgs/Idris2TextDao"
+comment = "Primary EVM package root for TextDao; all TimerChain implementation lives here"
+```
